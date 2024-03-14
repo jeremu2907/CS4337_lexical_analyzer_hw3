@@ -81,7 +81,7 @@ int idx = 0;
 
 string readFileContents(const string& filename);
 char getChar();
-bool match(string expectedLexeme);
+void match(string expectedLexeme);
 void lex();
 bool getLexeme();
 void reset();
@@ -93,11 +93,14 @@ void getStringLiteral();
 void quotedString();
 void namespaceDeclaration();
 void identifier();
-void statement();
+void statement(bool notChecked = true, bool runOnce = false);
 void variableDeclaration();
 void outputStatement();
 void inputStatement();
 void forStatement();
+void compareStatement();
+void operationStatement();
+void ifStatement();
 
 int main()
 {
@@ -184,8 +187,6 @@ void namespaceDeclaration()
     reset();
     lex();
 
-    identifier();
-
     reset();
     lex();
 }
@@ -195,13 +196,16 @@ void identifier()
     getLexeme();
 }
 
-void statement()
+void statement(bool notChecked, bool runOnce)
 {
     int i = 0;
-    while(++i < 7)
+    do
     {
-        reset();
-        lex();
+        if(notChecked)
+        {
+            reset();
+            lex();
+        }
         if (token == INT_KEYWORD)
         {
             variableDeclaration();
@@ -218,17 +222,26 @@ void statement()
         {
             forStatement();
         }
+        else if (token == IF_KEYWORD)
+        {
+            break;
+        }
+        else if (
+            token == RIGHT_CURLY_BRACE ||
+            token == SEMICOLON
+        )
+        {
+            break;
+        }
         else
         {
-            exit(EXIT_FAILURE);
+            break;
         }
-    }
+    }while(!runOnce);
 }
 
 void variableDeclaration()
 {
-    identifier();
-
     reset();
     lex();
 
@@ -274,6 +287,20 @@ void inputStatement()
 
     reset();
     lex();
+
+    if(token == SEMICOLON)
+    {
+        return;
+    }
+
+    reset();
+    lex();
+
+    reset();
+    lex();
+
+    reset();
+    lex();
 }
 
 void forStatement()
@@ -288,6 +315,63 @@ void forStatement()
     {
         variableDeclaration();
     }
+
+    reset();
+    lex();
+
+    compareStatement();
+
+    reset();
+    lex();
+
+    operationStatement();
+
+    reset();
+    lex();
+
+    reset();
+    lex();
+
+    if(token != LEFT_CURLY_BRACE)
+    {
+        statement(false, true);
+    }
+    else
+    {
+        statement();
+
+        reset();
+        lex();
+    }
+}
+
+void compareStatement()
+{
+    reset();
+    lex();
+
+    reset();
+    lex();
+
+    reset();
+    lex();
+}
+
+void operationStatement()
+{
+    reset();
+    lex();
+
+    reset();
+    lex();
+}
+
+void ifStatement()
+{
+    reset();
+    lex();
+
+    compareStatement();
 
     reset();
     lex();
@@ -359,6 +443,16 @@ void lex()
             lexeme += c;
             token = RIGHT_SQUARE_BRACKET;
             break;
+        
+        case '{':
+            lexeme += c;
+            token = LEFT_CURLY_BRACE;
+            break;
+        
+        case '}':
+            lexeme += c;
+            token = RIGHT_CURLY_BRACE;
+            break;
 
         case '"':
             lexeme += c;
@@ -368,6 +462,18 @@ void lex()
         case '=':
             lexeme += c;
             token = ASSIGNMENT_OPERATOR;
+            break;
+
+        case '+':
+            lexeme += c;
+            if(input[idx + 1] == '+')
+            {
+                lexeme += c;
+                token = INC_OPERATOR;
+                idx++;
+                break;
+            }
+            token = PLUS_OPERATOR;
             break;
         
         default:
@@ -400,6 +506,10 @@ void lex()
             else if(lexeme == "for")
             {
                 token = FOR_KEYWORD;
+            }
+            else if(lexeme == "if")
+            {
+                token = IF_KEYWORD;
             }
             else
             {
@@ -441,11 +551,12 @@ bool getLexeme()
     )
     {
         if (
-            c == '>' || c == '>' ||
+            c == '<' || c == '>' ||
             c == ';' || c == '"' ||
             c == '(' || c == ')' ||
             c == '[' || c == ']' ||
-            c == '='
+            c == '=' || c == '+' ||
+            c == '-'
         )
         {
             --idx;
@@ -471,9 +582,13 @@ char getChar()
     return input[idx];
 }
 
-bool match(string expectedLexeme)
+void match(string expectedLexeme)
 {
-    return (lexeme == expectedLexeme);
+    if (lexeme != expectedLexeme)
+    {
+        printf("Expected: %s, Got: %s\n", expectedLexeme.c_str(), lexeme.c_str());
+        exit(EXIT_FAILURE);
+    }
 }
 
 string readFileContents(const string& filename) {
