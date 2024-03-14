@@ -193,7 +193,26 @@ void namespaceDeclaration()
 
 void identifier()
 {
-    getLexeme();
+    reset();
+    lex();
+
+    reset();
+    if(getChar() == '[')
+    {
+        lex();
+
+        reset();
+        lex();
+
+        reset();
+        lex();
+    }
+    else
+    {
+        --idx;
+    }
+
+    return;
 }
 
 void statement(bool notChecked, bool runOnce)
@@ -224,6 +243,7 @@ void statement(bool notChecked, bool runOnce)
         }
         else if (token == IF_KEYWORD)
         {
+            ifStatement();
             break;
         }
         else if (
@@ -347,14 +367,12 @@ void forStatement()
 
 void compareStatement()
 {
-    reset();
-    lex();
+    identifier();
 
     reset();
     lex();
 
-    reset();
-    lex();
+    identifier();
 }
 
 void operationStatement()
@@ -572,7 +590,15 @@ bool getLexeme()
 
 void reset()
 {
+    char c;
     ++idx;
+    do {
+        c = getChar();
+        if (isspace(c))
+        {
+            ++idx;
+        }
+    } while (isspace(c));
     lexeme = "";
     token = -1;
 }
