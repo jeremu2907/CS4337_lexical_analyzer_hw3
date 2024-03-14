@@ -67,7 +67,7 @@ Since $\frac{1}{2} \gt -2$ and $x \gt \frac{1}{2}$, the weakest precondition is 
 ### 5
 ```
 <program> → <include_directive> <namespace_declaration>
-            "int" "main" "(" ")" "{" <statement> "return 0;" "}"
+            "int" "main" "(" ")" "{" {<statement>} "return 0;" "}"
 
 <namespace_declaration> → "using" "namespace" <identifier> ";"
 
