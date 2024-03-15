@@ -113,7 +113,7 @@ int main()
 
     program();
 
-    return 0;
+    exit(EXIT_SUCCESS);
 }
 
 void program()
@@ -147,6 +147,14 @@ void program()
     lex();
 
     statement();
+
+    reset();
+    lex();
+
+    reset();
+    lex();
+
+    return;
 }
 
 void includeDirective()
@@ -231,7 +239,6 @@ void statement(bool notChecked, bool runOnce)
         }
         else if (token == COUT_KEYWORD)
         {
-            cout << "OUTPUT\n";
             outputStatement();
         }
         else if (token == CIN_KEYWORD)
@@ -256,6 +263,10 @@ void statement(bool notChecked, bool runOnce)
         else if (token == IDENTIFIER)
         {
             identifier();
+        }
+        else if (token == RETURN_KEYWORD)
+        {
+            break;
         }
         else
         {
@@ -294,10 +305,31 @@ void outputStatement()
     reset();
     lex();
 
-    quotedString();
+    do
+    {
+        reset();
 
-    reset();
-    lex();
+        if (getChar() == ';')
+        {
+            lex();
+            return;
+        }
+        else if (getChar() == '"')
+        {
+            --idx;
+            quotedString();
+        }
+        else if (getChar() == '<')
+        {
+            lex();
+            continue;
+        }
+        else
+        {
+            --idx;
+            identifier();
+        }
+    } while (getChar() != ';');
 }
 
 void inputStatement()
@@ -559,6 +591,10 @@ void lex()
             else if(lexeme == "if")
             {
                 token = IF_KEYWORD;
+            }
+            else if(lexeme == "return")
+            {
+                token = RETURN_KEYWORD;
             }
             else
             {
