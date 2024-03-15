@@ -101,6 +101,7 @@ void forStatement();
 void compareStatement();
 void operationStatement();
 void ifStatement();
+void swapStatement();
 
 int main()
 {
@@ -217,7 +218,6 @@ void identifier()
 
 void statement(bool notChecked, bool runOnce)
 {
-    int i = 0;
     do
     {
         if(notChecked)
@@ -231,6 +231,7 @@ void statement(bool notChecked, bool runOnce)
         }
         else if (token == COUT_KEYWORD)
         {
+            cout << "OUTPUT\n";
             outputStatement();
         }
         else if (token == CIN_KEYWORD)
@@ -247,11 +248,14 @@ void statement(bool notChecked, bool runOnce)
             break;
         }
         else if (
-            token == RIGHT_CURLY_BRACE ||
-            token == SEMICOLON
+            token == RIGHT_CURLY_BRACE
         )
         {
             break;
+        }
+        else if (token == IDENTIFIER)
+        {
+            identifier();
         }
         else
         {
@@ -281,8 +285,7 @@ void variableDeclaration()
     }
     else if(token == ASSIGNMENT_OPERATOR)
     {
-        reset();
-        lex();
+        statement();
     }
 }
 
@@ -358,7 +361,7 @@ void forStatement()
     }
     else
     {
-        statement();
+        statement(true, true);
 
         reset();
         lex();
@@ -393,6 +396,34 @@ void ifStatement()
 
     reset();
     lex();
+
+    reset();
+    lex();
+
+    statement(true, true);
+
+    swapStatement();
+    
+    reset();
+    lex();
+}
+
+void swapStatement()
+{
+    do
+    {
+        reset();
+        lex();
+    } while (getChar() != ';');
+
+    do
+    {
+        reset();
+        if (getChar() != '{')
+        {
+            lex();
+        }
+    } while (getChar() != ';');
 }
 
 void lex()
