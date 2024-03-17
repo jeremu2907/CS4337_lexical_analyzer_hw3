@@ -1,3 +1,12 @@
+/*
+    Jeremy Nguyen
+    jsl190004@utdallas.edu
+    CS4337.001
+
+    written and compiled with std=c++17
+    input file named "in.cpp"
+*/
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -43,7 +52,8 @@ enum TokenType {
     SYSTEM_HEADER_INCLUDE,
     PREPROCESSOR_DIRECTIVE,
     STRING_LITERAL,
-    UNKNOWN
+    UNKNOWN,
+    EOF_,
 };
 
 std::unordered_map<std::string, int> tokenMap = {
@@ -154,7 +164,11 @@ void program()
     reset();
     lex();
 
-    return;
+    reset();
+    lex();
+
+    reset();
+    lex();
 }
 
 void includeDirective()
@@ -173,7 +187,7 @@ void includeDirective()
 
 void stringContent()
 {
-    reset();
+    ++idx;
     getStringLiteral();
 }
 
@@ -556,6 +570,10 @@ void lex()
             }
             token = PLUS_OPERATOR;
             break;
+        case '\0':
+            lexeme = "EOF";
+            token = EOF_;
+            break;
         
         default:
             if(isdigit(c))
@@ -609,6 +627,7 @@ void getStringLiteral()
 {
     token = STRING_LITERAL;
     char c = getChar();
+    lexeme = "";
     while(
         c != '"' && c != '>'
     )
@@ -696,6 +715,7 @@ string readFileContents(const string& filename) {
     while (getline(file, line)) {
         contents += line + '\n';
     }
+    contents += '\0';
 
     file.close();
     return contents;

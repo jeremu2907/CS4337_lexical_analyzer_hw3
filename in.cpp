@@ -10,7 +10,7 @@ int main()
     int a[n];
 
     cout << "\nEnter the elements: ";
-    for(int i=0; i<n; i++) cin >> a[i];
+    for(int i = 0; i<n; i++) cin >> a[i];
 
     for(int i=0; i < n; i++)
     {
